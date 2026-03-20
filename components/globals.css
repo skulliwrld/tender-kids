@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@layer base {
+  * {
+    @apply text-black;
+  }
+  
+  body {
+    @apply text-black bg-white;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-black font-bold;
+  }
+  
+  p, span, div, a, li, td, th, label {
+    @apply text-black;
+  }
+  
+  /* Make gray colors darker for better readability */
+  .text-gray-500, .text-gray-400, .text-gray-300 {
+    @apply text-gray-600;
+  }
+  
+  .text-gray-600 {
+    @apply text-gray-700;
+  }
+}
+
+@layer components {
+  .container-responsive {
+    @apply w-full px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+  
+  .card-responsive {
+    @apply bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg p-4 sm:p-6;
+  }
+  
+  .heading-1 {
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold;
+  }
+  
+  .heading-2 {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+  }
+  
+  .heading-3 {
+    @apply text-lg sm:text-xl md:text-2xl font-semibold;
+  }
+  
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-small-responsive {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .input-responsive {
+    @apply w-full px-3 sm:px-4 py-2 sm:py-2.5 md:py-3 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm sm:text-base;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl font-medium sm:font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all text-sm sm:text-base;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl font-medium sm:font-semibold hover:bg-gray-200 transition-all text-sm sm:text-base;
+  }
+  
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+  }
+  
+  .table-responsive table {
+    @apply w-full min-w-[600px] sm:min-w-full;
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .safe-area-padding {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+  
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hide-on-tablet {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .hover\:scale-\[1\.02\]:hover {
+    transform: none;
+  }
+  
+  button:active,
+  a:active {
+    transform: scale(0.98);
+  }
+}
