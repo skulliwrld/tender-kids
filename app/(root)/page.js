@@ -59,28 +59,30 @@ async function getStudentData(studentId) {
   const { connectToDB } = require('@/lib/Database/connectToDB')
   const { Student } = require('@/models/student.model')
   const { Result } = require('@/models/result.model')
-  const { ClassRoutine } = require('@/models/classroutine.model')
+
   const { Assessment } = require('@/models/assessment.model')
+  const { Assignment } = require('@/models/assignment.model')
   
   try {
     await connectToDB()
     const student = await Student.findById(studentId).populate('Class')
     
     const results = await Result.find({ student: studentId }).populate('subject').limit(5)
-    const assignments = await Assessment.find({ class: student?.Class?._id }).sort({ createdAt: -1 }).limit(5)
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'lowercase' })
-    const schedule = await ClassRoutine.find({ Class: student?.Class?._id, day: today }).populate('subject')
+    const assignments = await Assignment.find({ class: student?.Class?._id })
+      .populate('subject', 'Name')
+      .populate('teacher', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5)
     
     return {
       student,
       results,
       assignments,
-      schedule,
       className: student?.Class?.name || 'N/A'
     }
   } catch (error) {
     console.error('Error fetching student data:', error)
-    return { student: null, results: [], assignments: [], schedule: [], className: 'N/A' }
+    return { student: null, results: [], assignments: [], className: 'N/A' }
   }
 }
 
@@ -234,7 +236,6 @@ export default async function Dashboard() {
                   { name: 'Students', path: '/student', icon: FaUsers, color: 'bg-green-100 text-green-600' },
                   { name: 'Teachers', path: '/teacher', icon: FaChalkboardTeacher, color: 'bg-purple-100 text-purple-600' },
                   { name: 'Subjects', path: '/subject', icon: MdSubject, color: 'bg-orange-100 text-orange-600' },
-                  { name: 'Class Routines', path: '/classroutine', icon: FaCalendarAlt, color: 'bg-pink-100 text-pink-600' },
                   { name: 'Exams', path: '/exams', icon: FaClipboardList, color: 'bg-indigo-100 text-indigo-600' },
                 ].map((module) => (
                   <Link key={module.name} href={module.path} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 group">
@@ -323,16 +324,6 @@ export default async function Dashboard() {
                     </div>
                   </Link>
                   
-                  <Link href="/classroutine" className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FaCalendarAlt className="text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800">View Schedule</h3>
-                      <p className="text-gray-400 text-sm">Check class routine</p>
-                    </div>
-                  </Link>
-                  
                   <Link href="/student" className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors group">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                       <FaUsers className="text-purple-600" />
@@ -416,42 +407,21 @@ export default async function Dashboard() {
                 <Link href="/student/result" className="block text-center text-purple-600 font-medium mt-4 hover:underline">View All Results →</Link>
               </div>
 
-              {/* Today's Schedule */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Today's Schedule</h2>
-                <div className="space-y-3">
-                  {studentData.schedule.length > 0 ? studentData.schedule.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                      <div className="w-16 text-center">
-                        <p className="text-sm font-bold text-purple-600">{item.startTime || '00:00'}</p>
-                        <p className="text-xs text-gray-400">{item.endTime || '00:00'}</p>
-                      </div>
-                      <div className="flex-1 border-l-2 border-purple-200 pl-4">
-                        <h3 className="font-semibold text-gray-800">{item.subject?.name || 'Subject'}</h3>
-                        <p className="text-gray-400 text-sm">{item.Class?.name || 'Class'}</p>
-                      </div>
-                    </div>
-                  )) : (
-                    <p className="text-gray-500 text-center py-4">No classes scheduled for today</p>
-                  )}
-                </div>
-                <Link href="/classroutine" className="block text-center text-purple-600 font-medium mt-4 hover:underline">View Full Schedule →</Link>
-              </div>
-
               {/* Assignments */}
               <div className="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Assignments</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {studentData.assignments.length > 0 ? studentData.assignments.map((assignment, index) => (
                     <div key={index} className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100">
-                      <h3 className="font-semibold text-gray-800 mb-2">{assignment.title || 'Assignment'}</h3>
-                      <p className="text-gray-500 text-sm mb-2">{assignment.subject?.name || 'Subject'}</p>
+                      <h3 className="font-semibold text-gray-800 mb-2">{assignment.subject?.Name || 'Assignment'}</h3>
+                      <p className="text-gray-500 text-sm mb-2">Topic: {assignment.topic}</p>
+                      <p className="text-gray-400 text-xs mb-2">Teacher: {assignment.teacher?.name || 'N/A'}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'N/A'}</span>
+                        <span className="text-xs text-gray-400">Due: {assignment.deadline ? new Date(assignment.deadline).toLocaleDateString() : 'N/A'}</span>
                         <span className={`text-xs px-2 py-1 rounded ${
-                          assignment.status === 'submitted' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          assignment.submissions?.length > 0 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                         }`}>
-                          {assignment.status || 'Pending'}
+                          {assignment.submissions?.length > 0 ? 'Submitted' : 'Pending'}
                         </span>
                       </div>
                     </div>

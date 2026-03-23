@@ -5,14 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { VscDashboard } from "react-icons/vsc";
-import { FaSchool, FaChalkboardTeacher, FaUserGraduate, FaBookOpen, FaUsers, FaUser, FaSignOutAlt, FaCheckSquare, FaBars, FaTimes, FaChevronDown, FaChevronRight, FaCalendarAlt } from "react-icons/fa";
+import { FaSchool, FaChalkboardTeacher, FaUserGraduate, FaBookOpen, FaUsers, FaUser, FaSignOutAlt, FaCheckSquare, FaBars, FaTimes, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdOutlineSubject, MdFamilyRestroom } from "react-icons/md";
 import { PiExam } from "react-icons/pi";
 import { GiRadarCrossSection } from "react-icons/gi";
 
 const SideBar = () => {
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const role = session?.user?.role
     const pathname = usePathname()
     const [isMobileOpen, setIsMobileOpen] = React.useState(false)
@@ -112,12 +112,7 @@ const SideBar = () => {
             icon: <MdFamilyRestroom />,
             hasDropdown: false
         },
-        {
-            title: "Class Routine",
-            path: "/classroutine",
-            icon: <FaCalendarAlt />,
-            hasDropdown: false
-        },
+
         {
             title: "Attendance",
             path: "/attendance",
@@ -149,6 +144,12 @@ const SideBar = () => {
             title: "My Classes",
             path: "/teacher",
             icon: <FaSchool />,
+            hasDropdown: false
+        },
+        {
+            title: "Assignments",
+            path: "/teacher/assignments",
+            icon: <FaBookOpen />,
             hasDropdown: false
         },
         {
@@ -187,6 +188,12 @@ const SideBar = () => {
             title: "Dashboard",
             path: "/dashboard",
             icon: <VscDashboard />,
+            hasDropdown: false
+        },
+        {
+            title: "Assignments",
+            path: "/student/assignments",
+            icon: <FaBookOpen />,
             hasDropdown: false
         },
         {
@@ -230,7 +237,18 @@ const SideBar = () => {
         }
     ];
 
-    const navItems = role === 'admin' ? adminNavItems : role === 'teacher' ? teacherNavItems : role === 'parent' ? parentNavItems : studentNavItems;
+    const currentRole = status === 'authenticated' && role ? role : null;
+    const navItems = currentRole === 'admin' ? adminNavItems : currentRole === 'teacher' ? teacherNavItems : currentRole === 'parent' ? parentNavItems : currentRole === 'student' ? studentNavItems : [];
+
+    if (status === 'loading' || !currentRole) {
+        return (
+            <div className="fixed inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-purple-600 via-purple-700 to-indigo-800 shadow-2xl">
+                <div className="flex items-center justify-center h-full">
+                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+            </div>
+        )
+    }
 
     const handleSignOut = () => {
         signOut({ callbackUrl: '/signin' })
@@ -353,7 +371,7 @@ const SideBar = () => {
                 </div>
 
                 {/* User Section */}
-                {session && (
+                {role && session && (
                     <div className="p-4 border-t border-white/20 mt-auto">
                         <div className="bg-white/10 rounded-xl p-3 mb-3">
                             <p className="text-white text-sm font-medium truncate">{session.user?.name}</p>

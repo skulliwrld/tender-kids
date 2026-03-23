@@ -12,8 +12,9 @@ import { Class } from '@/models/class.model'
 import { Subject } from '@/models/subject.model'
 import Grade from '@/models/grade.model'
 import { Result } from '@/models/result.model'
-import { ClassRoutine } from '@/models/classroutine.model'
+
 import { Assessment } from '@/models/assessment.model'
+import { Assignment } from '@/models/assignment.model'
 import { Day } from '@/models/day.model'
 import { Timetable } from '@/models/timetable.model'
 import { cache } from 'react'
@@ -94,10 +95,14 @@ async function getStudentData(studentEmail) {
       ? Math.round(currentGrades.reduce((acc, g) => acc + g.marks, 0) / currentGrades.length)
       : 'N/A'
     
-    const assignments = await Assessment.find({ class: student?.Class?._id }).sort({ createdAt: -1 }).limit(5)
+    const assignments = await Assignment.find({ class: student?.Class?._id })
+      .populate('subject', 'Name')
+      .populate('teacher', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5)
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
     const dayDoc = await Day.findOne({ name: today })
-    const schedule = await ClassRoutine.find({ Class: student?.Class?._id, Day: dayDoc?._id }).populate('subject')
+    const schedule = await Timetable.find({ Class: student?.Class?._id, day: today }).populate('periods.subject')
     
     return {
       student,
@@ -296,7 +301,7 @@ export default async function Dashboard() {
                   { name: 'Parents', path: '/parent', icon: FaUser, color: 'bg-cyan-100 text-cyan-600' },
                   { name: 'Subjects', path: '/subject', icon: MdSubject, color: 'bg-orange-100 text-orange-600' },
                   { name: 'Timetable', path: '/timetable', icon: FaCalendarAlt, color: 'bg-teal-100 text-teal-600' },
-                  { name: 'Routines', path: '/classroutine', icon: FaClipboardList, color: 'bg-pink-100 text-pink-600' },
+
                   { name: 'Exams', path: '/exams', icon: FaStar, color: 'bg-indigo-100 text-indigo-600' },
                 ].map((module) => (
                   <Link key={module.name} href={module.path} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 group">
@@ -529,7 +534,7 @@ export default async function Dashboard() {
                     <p className="text-gray-500 text-center py-4 text-sm sm:text-base">No classes today</p>
                   )}
                 </div>
-                <Link href="/classroutine" className="block text-center text-purple-600 font-medium mt-3 sm:mt-4 hover:underline text-sm sm:text-base">View Schedule →</Link>
+
               </div>
 
               {/* Attendance */}

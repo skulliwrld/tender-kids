@@ -69,15 +69,6 @@ export const secondData = [
     },
 
     {
-      title:"Class Routine",
-      path:"/classroutine",
-      icons: <MdFamilyRestroom />,
-      contain:[
-          
-      ]
-  },
-
-    {
         title:"Exam Section",
         path:"/exams",
         icons: <PiExamDuotone />,

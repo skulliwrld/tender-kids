@@ -1,5 +1,6 @@
 import '@/components/globals.css'
 import Providers from '@/components/providers'
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
   title: "School Management System",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

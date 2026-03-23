@@ -1,6 +1,6 @@
 import NavBar from "@/components/shared-component/NavBar";
 import SideBar from "@/components/shared-component/SideBar";
-import Footer from "@/components/shared-component/Footer";
+
 
 function RootLayout({children}) {
     return (
@@ -11,7 +11,6 @@ function RootLayout({children}) {
               <div className="flex-1 p-3 sm:p-4 md:p-6 pt-16 md:pt-4">
                   {children}
               </div>
-              <Footer />
           </div>
       </div>
     )

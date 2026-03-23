@@ -1,6 +1,6 @@
 import { connectToDB } from '@/lib/Database/connectToDB'
 import { Teacher } from '@/models/teacher.model'
-import { Class } from '@/models/class.model'
+import { Subject } from '@/models/subject.model'
 import { NextResponse } from 'next/server'
 
 export async function GET(request) {
@@ -9,17 +9,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
 
-    let query = {}
-
-    if (email) {
-      const teacher = await Teacher.findOne({ email })
-      if (teacher) {
-        query.assignedTeacher = teacher._id
-      }
-    }
-
-    const classes = await Class.find(query).sort({ name: 1 })
-    return NextResponse.json({ success: true, classes })
+    const subjects = await Subject.find({}).populate('classes').sort({ Name: 1 })
+    return NextResponse.json({ success: true, subjects })
   } catch (error) {
     console.error('Error:', error)
     return NextResponse.json({ success: false, message: error.message }, { status: 500 })

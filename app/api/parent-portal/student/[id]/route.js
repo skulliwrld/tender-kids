@@ -3,6 +3,7 @@ import { connectToDB } from '@/lib/Database/connectToDB'
 import { Student } from '@/models/student.model'
 import Attendance from '@/models/attendance.model'
 import Grade from '@/models/grade.model'
+import mongoose from 'mongoose'
 
 export async function GET(request, { params }) {
   try {
@@ -11,6 +12,13 @@ export async function GET(request, { params }) {
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'Student ID is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid student ID' },
         { status: 400 }
       )
     }
@@ -36,20 +44,20 @@ export async function GET(request, { params }) {
 
     const grades = await Grade.find({ student: id })
       .populate('subject', 'Name')
-      .sort({ createdAt: -1 })
+      .sort({ term: -1, createdAt: -1 })
       .lean()
 
     return NextResponse.json({
       success: true,
       student: JSON.parse(JSON.stringify(student)),
       attendance: JSON.parse(JSON.stringify(attendance)),
-      grades: JSON.parse(JSON.stringify(grades))
+      results: JSON.parse(JSON.stringify(grades))
     })
 
   } catch (error) {
     console.error('Parent portal student data error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: error.message || 'Internal server error' },
       { status: 500 }
     )
   }
