@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { VscDashboard } from "react-icons/vsc";
-import { FaSchool, FaChalkboardTeacher, FaUserGraduate, FaBookOpen, FaUsers, FaUser, FaSignOutAlt, FaCheckSquare, FaBars, FaTimes, FaChevronDown, FaChevronRight } from "react-icons/fa";
+import { FaSchool, FaChalkboardTeacher, FaUserGraduate, FaBookOpen, FaUsers, FaUser, FaSignOutAlt, FaCheckSquare, FaBars, FaTimes, FaChevronDown, FaChevronRight, FaMoneyBillWave, FaFileInvoiceDollar, FaChartBar, FaWallet } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdOutlineSubject, MdFamilyRestroom } from "react-icons/md";
 import { PiExam } from "react-icons/pi";
@@ -26,7 +26,8 @@ const SideBar = () => {
       routine: false,
       exam: false,
       parent: false,
-      section: false
+      section: false,
+      fees: false
     });
   
     const toggleMenu = (menu) => {
@@ -130,6 +131,25 @@ const SideBar = () => {
             path: "/section",
             icon: <GiRadarCrossSection />,
             hasDropdown: false
+        },
+        {
+            title: "Academic Session",
+            path: "/fees/academic",
+            icon: <VscDashboard />,
+            hasDropdown: false
+        },
+        {
+            title: "Fees Management",
+            path: "/fees",
+            icon: <FaMoneyBillWave />,
+            hasDropdown: true,
+            key: "fees",
+            subItems: [
+                { title: "Dashboard", path: "/fees" },
+                { title: "Fee Structure", path: "/fees/structure" },
+                { title: "Collection", path: "/fees/collection" },
+                { title: "Reports", path: "/fees/reports" }
+            ]
         }
     ];
 
@@ -191,6 +211,12 @@ const SideBar = () => {
             hasDropdown: false
         },
         {
+            title: "My Fees",
+            path: "/fees/student",
+            icon: <FaWallet />,
+            hasDropdown: false
+        },
+        {
             title: "Assignments",
             path: "/student/assignments",
             icon: <FaBookOpen />,
@@ -227,6 +253,12 @@ const SideBar = () => {
             title: "Dashboard",
             path: "/dashboard",
             icon: <VscDashboard />,
+            hasDropdown: false
+        },
+        {
+            title: "Children Fees",
+            path: "/fees/parent",
+            icon: <FaMoneyBillWave />,
             hasDropdown: false
         },
         {

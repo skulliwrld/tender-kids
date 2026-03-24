@@ -610,27 +610,7 @@ export default async function Dashboard() {
                 </div>
               </div>
 
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Quick Actions</h2>
-                <div className="space-y-2 sm:space-y-3">
-                  {parentData.children && parentData.children.length > 0 && parentData.children.map((child) => (
-                    <Link 
-                      key={`action-${child._id}`}
-                      href={`/parent-portal/${child._id}`} 
-                      className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group"
-                    >
-                      <div className="w-8 sm:w-10 h-8 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FaUserGraduate className="text-blue-600 text-sm sm:text-base" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800 text-sm sm:text-base">View {child.Name}'s Profile</h3>
-                        <p className="text-gray-400 text-xs sm:text-sm">Attendance, results & more</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </>
         )}

@@ -7,6 +7,12 @@ export async function GET(request) {
     await connectToDB()
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
+    const all = searchParams.get('all')
+
+    if (all === 'true') {
+      const students = await Student.find().populate('Class', 'name').sort({ Name: 1 })
+      return NextResponse.json(students)
+    }
 
     if (!email) {
       return NextResponse.json({ success: false, message: 'Email required' }, { status: 400 })

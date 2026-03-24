@@ -30,11 +30,15 @@ function SigninForm() {
     setError('')
     setIsLoading(true)
 
+    console.log('Signing in with:', email)
+
     const result = await signIn('credentials', {
       email,
       password,
       redirect: false,
     })
+
+    console.log('Sign result:', result)
 
     if (result?.error) {
       setError('Invalid email, name, or password')
@@ -43,6 +47,9 @@ function SigninForm() {
       const session = await getSession()
       if (session) {
         router.push('/dashboard')
+      } else {
+        setError('Unable to get session. Please try again.')
+        setIsLoading(false)
       }
     }
   }

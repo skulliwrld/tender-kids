@@ -16,6 +16,8 @@ export const authConfig = {
         try {
           await connectToDB()
 
+          console.log('Attempting login for:', credentials.email)
+
           // Search by email OR name
           const user = await User.findOne({
             $or: [
@@ -24,11 +26,15 @@ export const authConfig = {
             ]
           })
 
+          console.log('User found:', user ? user.email : 'null')
+
           if (!user) {
             return null
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+          console.log('Password valid:', isPasswordValid)
 
           if (!isPasswordValid) {
             return null
