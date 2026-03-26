@@ -74,10 +74,10 @@ const paymentSchema = new Schema({
   },
 }, { timestamps: true });
 
+// Index for looking up payments by student with most recent first
 paymentSchema.index({ student: 1, paymentDate: -1 });
+// Index for filtering payments by session and term
 paymentSchema.index({ academicSession: 1, term: 1 });
-paymentSchema.index({ transactionId: 1 });
-paymentSchema.index({ referenceNumber: 1 });
-paymentSchema.index({ paymentDate: -1 });
+// Note: transactionId, referenceNumber, receiptNumber already have indexes from unique: true
 
 export const Payment = models.Payment || model("Payment", paymentSchema);
