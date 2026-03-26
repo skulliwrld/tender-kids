@@ -20,7 +20,7 @@ export default function FeeStructureManager() {
   const [sessions, setSessions] = useState([]);
   const [terms, setTerms] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
+    name: 'Tuition Fee',
     description: '',
     academicSession: '',
     term: '',
@@ -105,9 +105,35 @@ export default function FeeStructureManager() {
     await fetchTerms(sessionId);
   };
 
+  const handleFeeTypeChange = (feeType) => {
+    // Auto-populate the fee name based on fee type, but preserve if user has customized it
+    const feeTypeLabels = {
+      tuition: 'Tuition Fee',
+      registration: 'Registration Fee',
+      exam: 'Examination Fee',
+      transport: 'Transportation Fee',
+      hostel: 'Hostel Fee',
+      library: 'Library Fee',
+      sports: 'Sports Fee',
+      uniform: 'Uniform Fee',
+      other: 'Other Fee'
+    };
+    
+    // Only auto-fill name if it's empty or matches a previous auto-fill value
+    const autoFillName = feeTypeLabels[feeType] || '';
+    const currentName = formData.name;
+    const isAutoFilled = Object.values(feeTypeLabels).includes(currentName);
+    
+    setFormData({ 
+      ...formData, 
+      feeType,
+      name: (currentName === '' || isAutoFilled) ? autoFillName : currentName
+    });
+  };
+
   const resetForm = () => {
     setFormData({
-      name: '',
+      name: 'Tuition Fee',
       description: '',
       academicSession: '',
       term: '',
@@ -293,7 +319,7 @@ export default function FeeStructureManager() {
                   <select
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
                     value={formData.feeType}
-                    onChange={(e) => setFormData({ ...formData, feeType: e.target.value })}
+                    onChange={(e) => handleFeeTypeChange(e.target.value)}
                   >
                     <option value="tuition">Tuition</option>
                     <option value="registration">Registration</option>

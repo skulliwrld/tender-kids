@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import User from '@/models/user.model'
 
 export const authConfig = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: 'credentials',

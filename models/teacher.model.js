@@ -30,6 +30,7 @@ const TeacherSchema = new Schema({
     },
     phone:{
         type:Number,
+        default: null
     },
     photo:{
         type:String,

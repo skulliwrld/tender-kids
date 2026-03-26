@@ -5,91 +5,22 @@ import { useSession, signOut } from 'next-auth/react'
 import { FaSchool, FaSignOutAlt } from "react-icons/fa";
 import NavLinks from './NavLinks'
 
-export default function SideBarClient() {
+export default function SideBarClient({ isOpen = false, onClose }) {
     const { data: session, status } = useSession()
     const role = session?.user?.role
-    const pathname = '/' // We don't need actual pathname in client anymore
     
-    const [isMobileOpen, setIsMobileOpen] = React.useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState({})
-    const touchStartRef = React.useRef(null)
 
     React.useEffect(() => {
         const handleSidebarOpen = (e) => {
-            setIsMobileOpen(e.detail)
+            // External event handling - only if not using props
         }
         window.addEventListener('sidebar-open', handleSidebarOpen)
 
-        const handleSidebarState = (e) => {
-            setIsMobileOpen(e.detail)
-        }
-        window.addEventListener('sidebar_state', handleSidebarState)
-
-        const handleTouchStart = (e) => {
-            const touchX = e.touches[0].clientX
-            if (touchX < 80) {
-                touchStartRef.current = touchX
-            }
-        }
-
-        const handleTouchMove = (e) => {
-            if (touchStartRef.current === null) return
-            const currentX = e.touches[0].clientX
-            const diff = touchStartRef.current - currentX
-            if (diff < -60) {
-                setIsMobileOpen(true)
-            }
-            if (diff > 60) {
-                setIsMobileOpen(false)
-            }
-        }
-
-        const handleTouchEnd = () => {
-            touchStartRef.current = null
-        }
-
-        document.addEventListener('touchstart', handleTouchStart, { passive: true })
-        document.addEventListener('touchmove', handleTouchMove, { passive: true })
-        document.addEventListener('touchend', handleTouchEnd, { passive: true })
-
         return () => {
             window.removeEventListener('sidebar-open', handleSidebarOpen)
-            window.removeEventListener('sidebar_state', handleSidebarState)
-            document.removeEventListener('touchstart', handleTouchStart)
-            document.removeEventListener('touchmove', handleTouchMove)
-            document.removeEventListener('touchend', handleTouchEnd)
         }
     }, [])
-    
-    const [expandedMenus, setExpandedMenus] = React.useState({
-      class: false,
-      student: false,
-      teacher: false,
-      subject: false,
-      routine: false,
-      exam: false,
-      parent: false,
-      section: false,
-      fees: false
-    });
-  
-    const toggleMenu = (menu) => {
-        setExpandedMenus(prev => ({
-            ...prev,
-            [menu]: !prev[menu]
-        }));
-    }
-
-    const toggleMobileMenu = (menu) => {
-        setMobileMenuOpen(prev => ({
-            ...prev,
-            [menu]: !prev[menu]
-        }));
-    }
-
-    const handleSignOut = () => {
-        signOut({ callbackUrl: '/signin' })
-    }
 
     if (status === 'loading' || !role) {
         return (
@@ -105,20 +36,20 @@ export default function SideBarClient() {
         <>
             {/* Mobile Overlay */}
             <div 
-                className={`fixed inset-0 bg-black/50 z-30 block md:hidden ${isMobileOpen ? 'block' : 'hidden'}`}
-                onClick={() => setIsMobileOpen(false)}
+                className={`fixed inset-0 bg-black/50 z-30 block md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
             />
 
-            {/* Sidebar */}
-            <div className={`h-full flex flex-col bg-gradient-to-b from-purple-600 via-purple-700 to-indigo-800 shadow-2xl transition-transform duration-300 ${
-                isMobileOpen ? 'translate-x-0 fixed inset-0 z-50 w-72' : 'fixed inset-y-0 left-0 z-40 w-64 -translate-x-full md:translate-x-0'
+            {/* Sidebar - fixed on all screens, but slides on mobile */}
+            <div className={`h-full flex flex-col bg-gradient-to-b from-purple-600 via-purple-700 to-indigo-800 shadow-2xl transition-transform duration-300 ease-out ${
+                isOpen ? 'translate-x-0 fixed inset-0 z-50 w-72' : '-translate-x-full fixed inset-y-0 left-0 z-40 w-64 md:translate-x-0'
             }`}>
                 {/* Close button for mobile */}
                 <button 
-                    onClick={() => setIsMobileOpen(false)}
+                    onClick={onClose}
                     className="absolute top-4 right-4 p-2 text-white/80 hover:text-white block md:hidden"
                 >
-                    <span className="text-white">✕</span>
+                    <span className="text-white text-xl">✕</span>
                 </button>
 
                 {/* Header */}
@@ -135,10 +66,10 @@ export default function SideBarClient() {
                 {/* Navigation - Using NavLinks server component */}
                 <NavLinks 
                     role={role}
-                    expandedMenus={expandedMenus}
-                    toggleMenu={toggleMenu}
+                    expandedMenus={{}}
+                    toggleMenu={() => {}}
                     mobileMenuOpen={mobileMenuOpen}
-                    toggleMobileMenu={toggleMobileMenu}
+                    toggleMobileMenu={(menu) => setMobileMenuOpen(prev => ({...prev, [menu]: !prev[menu]}))}
                 />
 
                 {/* User Section */}
@@ -150,7 +81,7 @@ export default function SideBarClient() {
                             <p className="text-purple-200 text-xs capitalize mt-1">{session.user?.role}</p>
                         </div>
                         <button
-                            onClick={handleSignOut}
+                            onClick={() => signOut({ callbackUrl: '/signin' })}
                             className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-200 py-2 px-4 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
                         >
                             <FaSignOutAlt className="w-4 h-4" />

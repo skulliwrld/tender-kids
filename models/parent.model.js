@@ -8,6 +8,7 @@ const parentSchema = new Schema({
     },
     Phone:{
         type:Number,
+        default: null
     },
     Profession:{
         type:String,

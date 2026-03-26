@@ -30,7 +30,8 @@ const studentSchema = new Schema({
     },
 
     Phone:{
-        type:Number
+        type:Number,
+        default: null
     },
     Email:{
         type:String
