@@ -14,6 +14,7 @@ export default function ParentFeePortal() {
   const [feeSummary, setFeeSummary] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [showAllChildren, setShowAllChildren] = useState(true);
   const searchParams = useSearchParams();
@@ -41,7 +42,7 @@ export default function ParentFeePortal() {
         fetchAllChildrenTotals();
       }
     }
-  }, [selectedSession, children, showAllChildren, selectedChild]);
+  }, [selectedSession, children, showAllChildren, selectedChild, paymentDate]);
 
   useEffect(() => {
     if (selectedChild && selectedSession && !showAllChildren) {
@@ -88,7 +89,8 @@ export default function ParentFeePortal() {
       let allPaymentsData = [];
 
       for (const childId of childIds) {
-        const feesRes = await fetch(`/api/fees/student-fees?studentId=${childId}&academicSessionId=${selectedSession}`);
+        let feesUrl = `/api/fees/student-fees?studentId=${childId}&academicSessionId=${selectedSession}`;
+        const feesRes = await fetch(feesUrl);
         const feesData = await feesRes.json();
         
         if (Array.isArray(feesData)) {
@@ -100,7 +102,9 @@ export default function ParentFeePortal() {
           });
         }
 
-        const paymentsRes = await fetch(`/api/fees/payments?studentId=${childId}&academicSessionId=${selectedSession}`);
+        let paymentsUrl = `/api/fees/payments?studentId=${childId}&academicSessionId=${selectedSession}`;
+        if (paymentDate) paymentsUrl += `&paymentDate=${paymentDate}`;
+        const paymentsRes = await fetch(paymentsUrl);
         const paymentsData = await paymentsRes.json();
         
         if (Array.isArray(paymentsData)) {
@@ -151,7 +155,9 @@ export default function ParentFeePortal() {
     if (!selectedChild || !selectedSession) return;
     
     try {
-      const res = await fetch(`/api/fees/payments?studentId=${selectedChild}&academicSessionId=${selectedSession}`);
+      let url = `/api/fees/payments?studentId=${selectedChild}&academicSessionId=${selectedSession}`;
+      if (paymentDate) url += `&paymentDate=${paymentDate}`;
+      const res = await fetch(url);
       const data = await res.json();
       setChildPayments(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -304,36 +310,80 @@ export default function ParentFeePortal() {
 
           <Card>
             <CardHeader className="pb-2 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg">Payment History</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                {showAllChildren 
-                  ? `All payments for ${children.length} children`
-                  : `Payments for ${selectedChildData?.Name}`
-                }
-              </CardDescription>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                  <CardTitle className="text-base sm:text-lg">Payment History</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    {showAllChildren 
+                      ? `All payments for ${children.length} children`
+                      : `Payments for ${selectedChildData?.Name}`
+                    }
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {paymentDate && (
+                    <button
+                      onClick={() => setPaymentDate('')}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <input
+                    type="date"
+                    className="rounded-md border border-gray-300 px-2 py-1 text-xs sm:text-sm"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 sm:space-y-3">
-                {displayPayments.length > 0 ? displayPayments.map((payment) => (
-                  <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
-                    <div>
-                      <p className="font-medium text-sm sm:text-base">
-                        {showAllChildren && payment.student?.Name && `${payment.student.Name} - `}
-                        {payment.studentFee?.feeStructure?.name || 'Fee Payment'}
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        Receipt: {payment.receiptNumber || 'N/A'} | {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : ''}
-                      </p>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <p className="font-semibold text-green-600 text-sm sm:text-base">₦{(payment.amount || 0).toLocaleString()}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod || 'N/A'}</p>
-                    </div>
+              {displayPayments.length > 0 ? (
+                paymentDate ? (
+                  <div className="max-h-96 overflow-y-auto space-y-2 sm:space-y-3 pr-2">
+                    {displayPayments.map((payment) => (
+                      <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
+                        <div>
+                          <p className="font-medium text-sm sm:text-base">
+                            {showAllChildren && payment.student?.Name && `${payment.student.Name} - `}
+                            {payment.studentFee?.feeStructure?.name || 'Fee Payment'}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500">
+                            Receipt: {payment.receiptNumber || 'N/A'} | {payment.paymentDate ? new Date(payment.paymentDate).toLocaleTimeString() : ''}
+                          </p>
+                        </div>
+                        <div className="text-left sm:text-right">
+                          <p className="font-semibold text-green-600 text-sm sm:text-base">₦{(payment.amount || 0).toLocaleString()}</p>
+                          <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod || 'N/A'}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )) : (
-                  <p className="text-center text-gray-500 py-4 text-sm sm:text-base">No payment history</p>
-                )}
-              </div>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {displayPayments.map((payment) => (
+                      <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
+                        <div>
+                          <p className="font-medium text-sm sm:text-base">
+                            {showAllChildren && payment.student?.Name && `${payment.student.Name} - `}
+                            {payment.studentFee?.feeStructure?.name || 'Fee Payment'}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500">
+                            Receipt: {payment.receiptNumber || 'N/A'} | {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : ''}
+                          </p>
+                        </div>
+                        <div className="text-left sm:text-right">
+                          <p className="font-semibold text-green-600 text-sm sm:text-base">₦{(payment.amount || 0).toLocaleString()}</p>
+                          <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod || 'N/A'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <p className="text-center text-gray-500 py-4 text-sm sm:text-base">No payment history</p>
+              )}
             </CardContent>
           </Card>
         </>

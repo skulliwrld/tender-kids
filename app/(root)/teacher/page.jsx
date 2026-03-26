@@ -45,7 +45,7 @@ async function TeacherPage({ searchParams }) {
 
   return (
     <section className="w-full px-5">
-      <TopFied title="Teachers" path="/teacher/add-teacher" />
+      <TopFied title="Teachers" path="/teacher/add-teacher" searchType="teacher" />
 
       {Teachers && Teachers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

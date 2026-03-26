@@ -10,6 +10,7 @@ export default function AdminFeeDashboard() {
   const [terms, setTerms] = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
 
   useEffect(() => {
     fetchSessions();
@@ -23,7 +24,7 @@ export default function AdminFeeDashboard() {
 
   useEffect(() => {
     fetchDashboard();
-  }, [selectedSession, selectedTerm]);
+  }, [selectedSession, selectedTerm, paymentDate]);
 
   const fetchSessions = async () => {
     try {
@@ -59,6 +60,7 @@ export default function AdminFeeDashboard() {
       const params = new URLSearchParams({ type: 'dashboard' });
       if (selectedSession) params.append('academicSessionId', selectedSession);
       if (selectedTerm) params.append('termId', selectedTerm);
+      if (paymentDate) params.append('paymentDate', paymentDate);
       
       const res = await fetch(`/api/fees/reports?${params}`);
       const data = await res.json();
@@ -176,25 +178,78 @@ export default function AdminFeeDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="pb-2 sm:pb-4">
-            <CardTitle className="text-base sm:text-lg">Recent Payments</CardTitle>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <CardTitle className="text-base sm:text-lg">Recent Payments</CardTitle>
+                {paymentDate && (
+                  <p className="text-xs text-gray-500">
+                    {recentPayments?.length || 0} payment(s) on {new Date(paymentDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {paymentDate && (
+                  <button
+                    onClick={() => setPaymentDate('')}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
+                <input
+                  type="date"
+                  className="rounded-md border border-gray-300 px-2 py-1 text-xs sm:text-sm"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 sm:space-y-3">
-              {recentPayments?.slice(0, 5).map((payment) => (
-                <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
-                  <div>
-                    <p className="font-medium text-sm sm:text-base">{payment.student?.Name}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      {new Date(payment.paymentDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="font-semibold text-green-600 text-sm sm:text-base">₦{payment.amount?.toLocaleString()}</p>
-                    <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod}</p>
-                  </div>
+            {recentPayments?.length > 0 ? (
+              paymentDate ? (
+                <div className="max-h-96 overflow-y-auto space-y-2 sm:space-y-3 pr-2">
+                  {recentPayments.map((payment) => (
+                    <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
+                      <div>
+                        <p className="font-medium text-sm sm:text-base">{payment.student?.Name}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          {new Date(payment.paymentDate).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="font-semibold text-green-600 text-sm sm:text-base">₦{payment.amount?.toLocaleString()}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="space-y-2 sm:space-y-3">
+                  {recentPayments.slice(0, 5).map((payment) => (
+                    <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
+                      <div>
+                        <p className="font-medium text-sm sm:text-base">{payment.student?.Name}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          {new Date(payment.paymentDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="font-semibold text-green-600 text-sm sm:text-base">₦{payment.amount?.toLocaleString()}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {recentPayments.length > 5 && (
+                    <p className="text-xs text-center text-gray-500 pt-2">
+                      +{recentPayments.length - 5} more payments
+                    </p>
+                  )}
+                </div>
+              )
+            ) : (
+              <p className="text-center text-gray-500 py-4 text-sm">No payments found</p>
+            )}
           </CardContent>
         </Card>
 

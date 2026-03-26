@@ -37,28 +37,30 @@ async function SubjectPage() {
 
   return (
     <>
-    <div className="px-6 py-6 w-full">
+    <div className="p-3 sm:p-6 w-full">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 mb-6 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-              <FaBookOpen className="text-2xl" />
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-xl flex items-center justify-center">
+              <FaBookOpen className="text-xl sm:text-2xl" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Subject Management</h1>
-              <p className="text-purple-200">View and manage all school subjects</p>
+              <h1 className="text-lg sm:text-2xl font-bold">Subject Management</h1>
+              <p className="text-purple-200 text-xs sm:text-sm">View and manage all school subjects</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Link 
               href="/subject/assign" 
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg transition-colors text-xs sm:text-sm w-full sm:w-auto justify-center"
             >
               <FaLayerGroup size={14} />
               Assign to Classes
             </Link>
-            <TopFied title="Subject" path="/subject/add-subject"/>
+            <div className="w-full sm:w-auto">
+              <TopFied title="Subject" path="/subject/add-subject" searchType="subject"/>
+            </div>
           </div>
         </div>
       </div>

@@ -29,7 +29,7 @@ async function Classes({searchParams}) {
   
   return ( 
     <section className="w-full border-y-2 px-5">
-       <TopFied title={role === 'teacher' ? 'My Classes' : 'Classes'} path={role === 'admin' ? '/class/add-class' : null}/>
+       <TopFied title={role === 'teacher' ? 'My Classes' : 'Classes'} path={role === 'admin' ? '/class/add-class' : null} searchType="class"/>
 
        <ClassTable Data={classes || []} role={role}/>
 

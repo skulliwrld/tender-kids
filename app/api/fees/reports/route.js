@@ -18,9 +18,10 @@ export async function GET(req) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const minBalance = parseFloat(searchParams.get('minBalance') || '0');
+    const paymentDate = searchParams.get('paymentDate');
     
     if (type === 'dashboard') {
-      const dashboard = await getAdminFeeDashboard(academicSessionId, termId);
+      const dashboard = await getAdminFeeDashboard(academicSessionId, termId, paymentDate);
       return NextResponse.json(dashboard);
     }
     

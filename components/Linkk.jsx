@@ -4,31 +4,34 @@ import { FaBookOpen, FaPlus, FaChalkboardTeacher, FaLayerGroup, FaUsers, FaClipb
 
 const Linkk = ({items, title}) => {
   return (
-    <div className="w-full px-6 py-8">
+    <div className="w-full p-3 sm:px-6 sm:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-            <FaBookOpen className="text-white text-xl" />
+      <div className="mb-4 sm:mb-8">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <FaBookOpen className="text-white text-lg sm:text-xl" />
           </div>
-          Subject Management
+          <span className="hidden sm:inline">Subject Management</span>
+          <span className="sm:hidden">Subjects</span>
         </h1>
-        <p className="text-gray-500 mt-2">View subjects organized by class</p>
+        <p className="text-gray-500 mt-1 sm:mt-2 text-sm">View subjects organized by class</p>
       </div>
 
       {/* Classes Grid */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
             <FaLayerGroup className="text-purple-600" />
-            All Classes and Their Subjects
+            <span className="hidden sm:inline">All Classes and Their Subjects</span>
+            <span className="sm:hidden">Classes & Subjects</span>
           </h2>
           <Link 
             href={`/${title}/add-${title}`} 
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors text-sm w-full sm:w-auto justify-center"
           >
             <FaPlus className="text-sm" />
-            Add Subject
+            <span className="hidden sm:inline">Add Subject</span>
+            <span className="sm:hidden">Add</span>
           </Link>
         </div>
 

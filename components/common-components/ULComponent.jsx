@@ -112,7 +112,7 @@ const SubjectTable = ({ sub }) => {
     <div className="w-full">
       {/* Subject Cards Grid */}
       {sub && sub.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {sub.map((data, index) => {
             const colors = [
               { bg: 'from-blue-500 to-cyan-500', icon: 'text-blue-600' },
@@ -136,21 +136,21 @@ const SubjectTable = ({ sub }) => {
                 className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
                 {/* Header with gradient */}
-                <div className={`bg-gradient-to-r ${color.bg} p-5 relative overflow-hidden`}>
+                <div className={`bg-gradient-to-r ${color.bg} p-4 sm:p-5 relative overflow-hidden`}>
                   {/* Decorative circles */}
-                  <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full"></div>
-                  <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/10 rounded-full"></div>
+                  <div className="absolute -top-6 -right-6 w-16 sm:w-20 h-16 sm:h-20 bg-white/10 rounded-full"></div>
+                  <div className="absolute -bottom-3 -left-3 w-10 sm:w-14 h-10 sm:h-14 bg-white/10 rounded-full"></div>
                   
                   <div className="relative z-10">
                     <div className="flex items-start justify-between">
-                      <div className={`w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg`}>
-                        {getSubjectIcon(data.Name, "w-7 h-7 text-white")}
+                      <div className={`w-10 sm:w-14 h-10 sm:h-14 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg`}>
+                        {getSubjectIcon(data.Name, "w-5 sm:w-7 h-5 sm:h-7 text-white")}
                       </div>
                       
                       {/* Actions Dropdown */}
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <DropdownMenuTrigger className="bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-2 rounded-lg transition-colors">
+                          <svg className="w-4 sm:w-5 h-4 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                           </svg>
                         </DropdownMenuTrigger>
@@ -176,16 +176,16 @@ const SubjectTable = ({ sub }) => {
                       </DropdownMenu>
                     </div>
                     
-                    <h3 className="text-white font-bold text-xl mt-4">{data.Name}</h3>
+                    <h3 className="text-white font-bold text-base sm:text-xl mt-3 sm:mt-4">{data.Name}</h3>
                   </div>
                 </div>
                 
                 {/* Body */}
-                <div className="p-5">
-                  <div className="space-y-3">
+                <div className="p-4 sm:p-5">
+                  <div className="space-y-2 sm:space-y-3">
                     {data.assignedTeacher ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-7 sm:w-8 h-7 sm:h-8 bg-purple-100 rounded-full flex items-center justify-center">
                           <FaChalkboardTeacher className="text-purple-600 text-xs" />
                         </div>
                         <div>
@@ -194,8 +194,8 @@ const SubjectTable = ({ sub }) => {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-7 sm:w-8 h-7 sm:h-8 bg-gray-100 rounded-full flex items-center justify-center">
                           <FaChalkboardTeacher className="text-gray-400 text-xs" />
                         </div>
                         <div>
@@ -206,7 +206,7 @@ const SubjectTable = ({ sub }) => {
                     )}
                     
                     {data.description && (
-                      <div className="pt-3 border-t border-gray-100">
+                      <div className="pt-2 sm:pt-3 border-t border-gray-100">
                         <p className="text-xs text-gray-500 mb-1">Description</p>
                         <p className="text-sm text-gray-700 line-clamp-2">{data.description}</p>
                       </div>
@@ -218,15 +218,15 @@ const SubjectTable = ({ sub }) => {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FaBookOpen className="text-3xl text-gray-400" />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+          <div className="w-16 sm:w-20 h-16 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <FaBookOpen className="text-2xl sm:text-3xl text-gray-400" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Subjects Found</h3>
-          <p className="text-gray-500 mb-4">This class doesn't have any subjects yet.</p>
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">No Subjects Found</h3>
+          <p className="text-gray-500 mb-3 sm:mb-4 text-sm">This class doesn't have any subjects yet.</p>
           <Link 
             href="/subject/add-subject" 
-            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-5 py-2 rounded-lg transition-colors text-sm"
           >
             <FaPlus />
             Add Subject

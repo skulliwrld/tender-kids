@@ -39,7 +39,7 @@ export default function Home() {
           
           <Link href="/signup" className="bg-white/10 text-white border-2 border-white/30 rounded-2xl p-8 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2">
             <h2 className="text-2xl font-bold mb-2">Create Account</h2>
-            <p className="text-purple-100">Register as Admin, Teacher, or Student</p>
+            <p className="text-purple-100">Register as  Teacher,Studen or Parentt</p>
           </Link>
         </div>
       </div>

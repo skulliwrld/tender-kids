@@ -14,6 +14,7 @@ export async function GET(req) {
     const termId = searchParams.get('termId');
     const studentFeeId = searchParams.get('studentFeeId');
     const history = searchParams.get('history');
+    const paymentDate = searchParams.get('paymentDate');
     
     if (id) {
       const payment = await getPaymentById(id);
@@ -53,11 +54,11 @@ export async function GET(req) {
     }
     
     if (targetStudentId) {
-      const payments = await getStudentPayments(targetStudentId, academicSessionId, termId);
+      const payments = await getStudentPayments(targetStudentId, academicSessionId, termId, paymentDate);
       return NextResponse.json(payments);
     }
     
-    const payments = await getPayments({ academicSessionId, termId });
+    const payments = await getPayments({ academicSessionId, termId, paymentDate });
     return NextResponse.json(payments);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
