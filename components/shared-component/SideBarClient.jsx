@@ -1,15 +1,30 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { FaSchool, FaSignOutAlt } from "react-icons/fa";
 import NavLinks from './NavLinks'
 
 export default function SideBarClient({ isOpen = false, onClose }) {
+    const router = useRouter()
     const { data: session, status } = useSession()
     const role = session?.user?.role
     
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState({})
+    const [expandedMenus, setExpandedMenus] = React.useState({})
+
+    const handleSchoolHeaderClick = () => {
+      const dashboardRoutes = {
+        admin: '/dashboard',
+        teacher: '/dashboard',
+        student: '/dashboard',
+        parent: '/dashboard'
+      }
+      if (role) {
+        router.push(dashboardRoutes[role] || '/dashboard')
+      }
+    }
 
     React.useEffect(() => {
         const handleSidebarOpen = (e) => {
@@ -52,22 +67,25 @@ export default function SideBarClient({ isOpen = false, onClose }) {
                     <span className="text-white text-xl">✕</span>
                 </button>
 
-                {/* Header */}
-                <div className="flex items-center gap-3 pb-6 border-b border-white/20 mb-4 px-4 pt-16 lg:pt-6">
+                {/* Header - Clickable */}
+                <button
+                  onClick={handleSchoolHeaderClick}
+                  className="flex items-center gap-3 pb-6 border-b border-white/20 mb-4 px-4 pt-16 lg:pt-6 hover:opacity-80 transition-opacity w-full"
+                >
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-purple-700 flex items-center justify-center shadow-lg">
                         <FaSchool className="text-white text-lg" />
                     </div>
-                    <div>
+                    <div className="text-left">
                         <h1 className="text-white font-bold text-lg leading-tight">School</h1>
                         <p className="text-purple-200 text-xs">Management System</p>
                     </div>
-                </div>
+                </button>
 
                 {/* Navigation - Using NavLinks server component */}
                 <NavLinks 
                     role={role}
-                    expandedMenus={{}}
-                    toggleMenu={() => {}}
+                    expandedMenus={expandedMenus}
+                    toggleMenu={(menu) => setExpandedMenus(prev => ({...prev, [menu]: !prev[menu]}))}
                     mobileMenuOpen={mobileMenuOpen}
                     toggleMobileMenu={(menu) => setMobileMenuOpen(prev => ({...prev, [menu]: !prev[menu]}))}
                 />

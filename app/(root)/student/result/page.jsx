@@ -6,7 +6,8 @@ import { Student } from '@/models/student.model'
 import Grade from '@/models/grade.model'
 import { Subject } from '@/models/subject.model'
 import Link from 'next/link'
-import { FaGraduationCap, FaBook, FaStar, FaCalendar, FaArrowLeft, FaTrophy, FaMedal, FaChartLine } from 'react-icons/fa'
+import { FaArrowLeft } from 'react-icons/fa'
+import AdvancedResultSheet from '@/components/AdvancedResultSheet'
 
 async function getStudentResults(studentEmail) {
   try {
@@ -59,10 +60,10 @@ async function StudentResultPage() {
 
   if (!student) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-purple-900 mb-3 sm:mb-4">No Student Record Found</h1>
-          <Link href="/dashboard" className="text-purple-600 hover:underline text-sm sm:text-base">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3 sm:mb-4">No Student Record Found</h1>
+          <Link href="/dashboard" className="text-indigo-600 hover:underline text-sm sm:text-base">
             Go back to dashboard
           </Link>
         </div>
@@ -77,236 +78,34 @@ async function StudentResultPage() {
   const currentTerm = terms[0] || 'Term 1'
   const currentSession = sessions[0] || '2025-2026'
   
-  const currentGrades = grades.filter(g => g.term === currentTerm && g.academicSession === currentSession)
+  // Ensure all data is properly serialized for client component
+  const serializedGrades = JSON.parse(JSON.stringify(
+    grades.filter(g => g.term === currentTerm && g.academicSession === currentSession)
+  ))
   
-  const getSubjectScore = (subjectId, examType) => {
-    const grade = currentGrades.find(g => 
-      g.subject?._id?.toString() === subjectId?.toString() && g.exam === examType
-    )
-    return grade?.marks || '-'
-  }
-
-  const getAverageForSubject = (subjectId) => {
-    const subjectGrades = currentGrades.filter(g => 
-      g.subject?._id?.toString() === subjectId?.toString()
-    )
-    if (subjectGrades.length === 0) return '-'
-    const sum = subjectGrades.reduce((acc, g) => acc + g.marks, 0)
-    return Math.round(sum / subjectGrades.length)
-  }
-
-  const getGradeLetter = (score) => {
-    if (score === '-') return '-'
-    if (score >= 90) return 'A+'
-    if (score >= 80) return 'A'
-    if (score >= 70) return 'B'
-    if (score >= 60) return 'C'
-    if (score >= 50) return 'D'
-    return 'F'
-  }
-
-  const overallAverage = currentGrades.length > 0 
-    ? Math.round(currentGrades.reduce((acc, g) => acc + g.marks, 0) / currentGrades.length)
-    : 0
+  const serializedStudent = JSON.parse(JSON.stringify(student))
+  const serializedSubjects = JSON.parse(JSON.stringify(subjects))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-100 p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-4 sm:mb-6 lg:mb-8">
-          <Link href="/dashboard" className="inline-flex items-center gap-1 sm:gap-2 text-purple-700 hover:text-purple-900 mb-3 sm:mb-4 font-semibold transition-colors text-sm sm:text-base">
-            <FaArrowLeft className="text-xs sm:text-sm" /> Back to Dashboard
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      {/* Navigation */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+            <FaArrowLeft className="text-sm" /> Back to Dashboard
           </Link>
-          
-          <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 text-white shadow-xl lg:shadow-2xl">
-            <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 sm:gap-6">
-              <div className="flex items-center gap-3 sm:gap-4 lg:gap-8">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center overflow-hidden border-2 sm:border-4 border-white/30 shadow-xl flex-shrink-0">
-                  {student.photo ? (
-                    <img src={student.photo} alt={student.Name} className="w-full h-full object-cover" />
-                  ) : (
-                    <FaGraduationCap className="text-2xl sm:text-3xl lg:text-5xl text-white/80" />
-                  )}
-                </div>
-                <div className="text-center md:text-left">
-                  <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">{student.Name}</h1>
-                  <p className="text-purple-200 text-sm sm:text-base lg:text-xl mt-1">{className}</p>
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-4 mt-2 sm:mt-3 text-purple-200">
-                    <span className="flex items-center gap-1 sm:gap-2 bg-white/10 px-2 sm:px-3 lg:px-4 py-1 rounded-full text-xs sm:text-sm"><FaCalendar className="text-xs" /> {currentTerm} - {currentSession}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="text-center bg-white/15 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-lg border border-white/20 w-full md:w-auto">
-                <p className="text-purple-200 mb-1 sm:mb-2 text-xs sm:text-sm lg:text-base">Overall Average</p>
-                <p className="text-3xl sm:text-4xl lg:text-6xl font-bold">{overallAverage}%</p>
-                <p className="text-purple-200 mt-1 sm:mt-2 font-bold text-lg sm:text-xl lg:text-xl">{getGradeLetter(overallAverage)}</p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-          <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-200 text-xs sm:text-sm">Total Subjects</p>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-1 sm:mt-2">{subjects.length}</p>
-              </div>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <FaBook className="text-sm sm:text-xl lg:text-3xl" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-700 to-indigo-700 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-200 text-xs sm:text-sm">Grades Entered</p>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-1 sm:mt-2">{currentGrades.length}</p>
-              </div>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <FaChartLine className="text-sm sm:text-xl lg:text-3xl" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-200 text-xs sm:text-sm">Highest Score</p>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-1 sm:mt-2">
-                  {currentGrades.length > 0 ? Math.max(...currentGrades.map(g => g.marks)) : 0}%
-                </p>
-              </div>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <FaTrophy className="text-sm sm:text-xl lg:text-3xl" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-200 text-xs sm:text-sm">Lowest Score</p>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-1 sm:mt-2">
-                  {currentGrades.length > 0 ? Math.min(...currentGrades.map(g => g.marks)) : 0}%
-                </p>
-              </div>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <FaMedal className="text-sm sm:text-xl lg:text-3xl" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Result Sheet */}
-        <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl lg:shadow-2xl overflow-hidden border-2 border-purple-600">
-          <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
-            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2">
-              <FaStar className="text-yellow-300 text-sm sm:text-lg lg:text-xl" />
-              Result Sheet
-            </h2>
-            <p className="text-purple-200 mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg">{currentTerm} - {currentSession} Academic Session</p>
-          </div>
-
-          {subjects.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-purple-50">
-                  <tr>
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 lg:py-5 text-left text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-r border-purple-300">Subject</th>
-                    <th className="px-1 sm:px-2 py-2 sm:py-3 lg:py-5 text-center text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-r border-purple-300">Test</th>
-                    <th className="px-1 sm:px-2 py-2 sm:py-3 lg:py-5 text-center text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-r border-purple-300">Assign</th>
-                    <th className="px-1 sm:px-2 py-2 sm:py-3 lg:py-5 text-center text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-r border-purple-300">Exam</th>
-                    <th className="px-1 sm:px-2 py-2 sm:py-3 lg:py-5 text-center text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-r border-purple-300">Avg</th>
-                    <th className="px-1 sm:px-2 py-2 sm:py-3 lg:py-5 text-center text-xs sm:text-sm lg:text-base font-bold text-purple-900 border-b-2 border-purple-300">Grade</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-purple-100">
-                  {subjects.map((subject, index) => {
-                    const avg = getAverageForSubject(subject._id)
-                    const rowBg = index % 2 === 0 ? 'bg-white' : 'bg-purple-50/50'
-                    return (
-                      <tr key={subject._id} className={`${rowBg} hover:bg-purple-100 transition-colors`}>
-                        <td className="px-2 sm:px-4 py-2 sm:py-3 lg:py-4 border-r border-purple-200">
-                          <div>
-                            <p className="font-bold text-purple-900 text-xs sm:text-base lg:text-lg">{subject.Name}</p>
-                            {subject.assignedTeacher && (
-                              <p className="text-xs sm:text-sm text-purple-600 hidden sm:block">{subject.assignedTeacher.name}</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-1 sm:px-2 py-2 sm:py-3 lg:py-4 text-center border-r border-purple-200">
-                          <span className="inline-block px-1 sm:px-2 py-1 rounded-lg font-bold bg-purple-100 text-purple-800 border border-purple-300 text-xs sm:text-sm">
-                            {getSubjectScore(subject._id, 'Test')}
-                          </span>
-                        </td>
-                        <td className="px-1 sm:px-2 py-2 sm:py-3 lg:py-4 text-center border-r border-purple-200">
-                          <span className="inline-block px-1 sm:px-2 py-1 rounded-lg font-bold bg-purple-100 text-purple-800 border border-purple-300 text-xs sm:text-sm">
-                            {getSubjectScore(subject._id, 'Assignment')}
-                          </span>
-                        </td>
-                        <td className="px-1 sm:px-2 py-2 sm:py-3 lg:py-4 text-center border-r border-purple-200">
-                          <span className="inline-block px-1 sm:px-2 py-1 rounded-lg font-bold bg-purple-100 text-purple-800 border border-purple-300 text-xs sm:text-sm">
-                            {getSubjectScore(subject._id, 'Final Exam')}
-                          </span>
-                        </td>
-                        <td className="px-1 sm:px-2 py-2 sm:py-3 lg:py-4 text-center border-r border-purple-200">
-                          <span className="inline-block px-1 sm:px-2 lg:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm lg:text-lg bg-purple-600 text-white border border-purple-800">
-                            {avg}
-                          </span>
-                        </td>
-                        <td className="px-1 sm:px-2 py-2 sm:py-3 lg:py-4 text-center">
-                          <span className={`inline-block px-1 sm:px-2 lg:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm lg:text-lg border-2 ${
-                            avg === '-' ? 'bg-gray-100 text-gray-500 border-gray-300' :
-                            avg >= 90 ? 'bg-yellow-400 text-yellow-900 border-yellow-600' :
-                            avg >= 80 ? 'bg-green-500 text-white border-green-700' :
-                            avg >= 70 ? 'bg-blue-500 text-white border-blue-700' :
-                            avg >= 60 ? 'bg-orange-400 text-white border-orange-600' :
-                            'bg-red-500 text-white border-red-700'
-                          }`}>
-                            {getGradeLetter(avg)}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-8 sm:py-12 lg:py-20">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <FaBook className="text-2xl sm:text-3xl lg:text-5xl text-purple-400" />
-              </div>
-              <h3 className="text-lg sm:text-2xl font-bold text-purple-900 mb-2 sm:mb-3">No Results Yet</h3>
-              <p className="text-purple-600 text-sm sm:text-lg">Your grades have not been entered yet.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Term Selector */}
-        {terms.length > 1 && (
-          <div className="mt-4 sm:mt-6 lg:mt-8 flex justify-center">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-800 rounded-xl sm:rounded-2xl p-1 sm:p-2 flex gap-1 sm:gap-2 shadow-xl">
-              {terms.map(term => (
-                <button
-                  key={term}
-                  className={`px-3 sm:px-5 lg:px-8 py-2 sm:py-2 lg:py-3 rounded-lg sm:rounded-xl font-bold transition-all text-xs sm:text-sm lg:text-base ${
-                    term === currentTerm 
-                      ? 'bg-white text-purple-800 shadow-lg' 
-                      : 'text-white hover:bg-white/10'
-                  }`}
-                >
-                  {term}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Advanced Result Sheet */}
+      <AdvancedResultSheet
+        student={serializedStudent}
+        subjects={serializedSubjects}
+        grades={serializedGrades}
+        term={currentTerm}
+        session={currentSession}
+        className={className}
+      />
     </div>
   )
 }

@@ -1,15 +1,31 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { FaBars, FaMapMarkerAlt, FaEnvelope, FaPhone } from "react-icons/fa"
 
 function NavBar({ onMenuToggle }) {
+  const router = useRouter()
+  const { data: session } = useSession()
   const schoolName = "Tender Kids Nursery and Basic School"
   const schoolMotto = "Nurturing Future Leaders"
   
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
+  
+  const handleLogoClick = () => {
+    const dashboardRoutes = {
+      admin: '/dashboard',
+      teacher: '/dashboard',
+      student: '/dashboard',
+      parent: '/dashboard'
+    }
+    if (session?.user?.role) {
+      router.push(dashboardRoutes[session.user.role] || '/dashboard')
+    }
+  }
   
   useEffect(() => {
     const handleScroll = () => {
@@ -57,37 +73,20 @@ function NavBar({ onMenuToggle }) {
               <FaBars className="w-5 h-5" />
             </button>
             
-            {/* Logo */}
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
+            {/* Logo - Clickable */}
+            <button
+              onClick={handleLogoClick}
+              className="w-8 h-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
+              aria-label="Go to dashboard"
+            >
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
               </svg>
-            </div>
+            </button>
             
             {/* School Name */}
             <div className="flex-1 min-w-0">
               <h1 className="font-bold text-white text-sm leading-tight truncate">{schoolName}</h1>
-            </div>
-          </div>
-          
-          {/* Bottom Row: Contact Info - Compact */}
-          <div className="flex items-center gap-3 mt-1.5 ml-10 text-white/90 text-xs">
-            {/* Location */}
-            <div className="flex items-center gap-1">
-              <FaMapMarkerAlt className="w-3 h-3" />
-              <span className="whitespace-nowrap">123 Education Street</span>
-            </div>
-            
-            {/* Email */}
-            <div className="flex items-center gap-1">
-              <FaEnvelope className="w-3 h-3" />
-              <span className="whitespace-nowrap">info@tenderkids.edu</span>
-            </div>
-            
-            {/* Phone */}
-            <div className="flex items-center gap-1">
-              <FaPhone className="w-3 h-3" />
-              <span className="whitespace-nowrap">+2348157382509</span>
             </div>
           </div>
         </div>
@@ -99,9 +98,12 @@ function NavBar({ onMenuToggle }) {
         ${isScrolled ? 'shadow-xl' : ''}
       `}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-          {/* Left Side - Logo & Name */}
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
+          {/* Left Side - Logo & Name - Clickable */}
+          <button
+            onClick={handleLogoClick}
+            className="flex items-center gap-2 sm:gap-3 md:gap-4 hover:opacity-80 transition-opacity text-left"
+          >
+            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 transition-colors">
               <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
               </svg>
@@ -110,7 +112,7 @@ function NavBar({ onMenuToggle }) {
               <h1 className="font-extrabold text-lg sm:text-xl md:text-2xl tracking-tight leading-tight">{schoolName}</h1>
               <p className="font-semibold text-blue-100 text-xs sm:text-sm">{schoolMotto}</p>
             </div>
-          </div>
+          </button>
           
           {/* Right Side - Contact Info - Always visible */}
           <div className="flex flex-wrap items-center justify-start sm:justify-end gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm">

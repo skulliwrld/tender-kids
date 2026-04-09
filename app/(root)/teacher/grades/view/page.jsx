@@ -31,7 +31,7 @@ export default function TeacherGradesViewPage() {
       if (!session?.user?.email) return
       
       try {
-        const res = await fetch('/api/teacher/classes')
+        const res = await fetch(`/api/teacher/classes?email=${session?.user?.email}`)
         const data = await res.json()
         setClasses(data.classes || [])
       } catch (error) {

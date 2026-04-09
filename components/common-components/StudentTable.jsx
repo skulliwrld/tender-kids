@@ -3,6 +3,7 @@
 import '@/components/common-components/style.css'
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,12 +11,20 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { deleteStudent } from '@/lib/actions/student.action';
 import { FaEdit, FaTrashAlt, FaEye, FaUserGraduate } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
 const StudentTable = ({ students, showClass = false, className = '' }) => {
   const router = useRouter();
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
 
   const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this student?')) {
@@ -24,6 +33,11 @@ const StudentTable = ({ students, showClass = false, className = '' }) => {
       await deleteStudent(formData);
       router.refresh();
     }
+  };
+
+  const handlePhotoClick = (student) => {
+    setSelectedStudent(student);
+    setOpenPhotoDialog(true);
   };
 
   return (
@@ -56,7 +70,10 @@ const StudentTable = ({ students, showClass = false, className = '' }) => {
                         students.map((student, index) => (
                             <tr key={student._id || index} className="hover:bg-indigo-50/50 transition-colors duration-200">
                                 <td className="px-4 py-3">
-                                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-100 shadow-sm">
+                                    <div 
+                                        onClick={() => handlePhotoClick(student)}
+                                        className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-100 shadow-sm cursor-pointer hover:shadow-lg hover:border-indigo-400 transition-all duration-200"
+                                    >
                                         {student.photo ? (
                                             <Image 
                                                 src={student.photo} 
@@ -141,6 +158,33 @@ const StudentTable = ({ students, showClass = false, className = '' }) => {
                 </tbody>
             </table>
         </div>
+
+        {/* Photo Dialog */}
+        <Dialog open={openPhotoDialog} onOpenChange={setOpenPhotoDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold">
+                {selectedStudent?.Name || selectedStudent?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center">
+              {selectedStudent?.photo ? (
+                <div className="relative w-64 h-64 rounded-xl overflow-hidden shadow-xl border-8 border-indigo-100">
+                  <Image 
+                    src={selectedStudent.photo} 
+                    alt={selectedStudent.Name || selectedStudent.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-64 h-64 bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-9xl font-bold rounded-xl shadow-xl">
+                  {(selectedStudent?.Name || selectedStudent?.name)?.charAt(0)?.toUpperCase() || 'S'}
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   )
 }

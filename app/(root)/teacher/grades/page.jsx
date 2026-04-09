@@ -36,7 +36,7 @@ const GradesPage = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch('/api/teacher/classes')
+        const res = await fetch(`/api/teacher/classes?email=${session?.user?.email}`)
         if (res.ok) {
           const data = await res.json()
           setClassesList(data.classes || [])

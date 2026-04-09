@@ -64,25 +64,6 @@ async function StudentPage(props) {
     className: getClassName(student.Class?.toString())
   })) || [];
 
-  const getStudentsByClass = () => {
-    const grouped = {};
-    filteredStudents?.forEach(student => {
-      const classId = student.Class?.toString();
-      if (!classId) return;
-      if (!grouped[classId]) {
-        grouped[classId] = {
-          className: getClassName(classId),
-          classId,
-          students: []
-        };
-      }
-      grouped[classId].students.push(student);
-    });
-    return Object.values(grouped);
-  };
-
-  const groupedStudents = getStudentsByClass();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -192,34 +173,6 @@ async function StudentPage(props) {
             />
           </div>
         </div>
-
-        {!selectedClassId && groupedStudents.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Students by Class</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {groupedStudents.map(group => (
-                <div key={group.classId} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-4">
-                    <div className="flex items-center justify-between text-white">
-                      <h3 className="font-semibold">{group.className}</h3>
-                      <span className="bg-white/20 px-2 py-1 rounded-full text-sm">
-                        {group.students.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <Link 
-                      href={`/student?class=${group.classId}`}
-                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
-                    >
-                      View All <FaSearch className="text-xs" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

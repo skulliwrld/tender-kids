@@ -29,7 +29,12 @@ function InputGradesContent() {
   const [studentScores, setStudentScores] = useState({})
 
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Mid Term', 'Final']
-  const examTypes = ['Test', 'Quiz', 'Assignment', 'Project', 'Midterm', 'Final Exam']
+  const examTypes = ['Test', 'Assignment', 'Exam']
+  const scoreLimits = {
+    Test: 20,
+    Assignment: 10,
+    Exam: 70
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -40,7 +45,7 @@ function InputGradesContent() {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch('/api/teacher/classes')
+        const res = await fetch(`/api/teacher/classes?email=${session?.user?.email}`)
         if (res.ok) {
           const data = await res.json()
           setClassesList(data.classes || [])
@@ -89,11 +94,8 @@ function InputGradesContent() {
           data.forEach(student => {
             initialScores[student._id] = {
               Test: '',
-              Quiz: '',
               Assignment: '',
-              Project: '',
-              'Midterm': '',
-              'Final Exam': ''
+              Exam: ''
             }
           })
           setStudentScores(initialScores)
@@ -108,13 +110,23 @@ function InputGradesContent() {
   }, [selectedClass])
 
   const handleScoreChange = (studentId, examType, value) => {
+    const numValue = value === '' ? '' : Math.min(parseFloat(value) || 0, scoreLimits[examType])
     setStudentScores(prev => ({
       ...prev,
       [studentId]: {
         ...prev[studentId],
-        [examType]: value
+        [examType]: numValue === '' ? '' : numValue.toString()
       }
     }))
+  }
+
+  const calculateTotal = (studentId) => {
+    const scores = studentScores[studentId]
+    if (!scores) return 0
+    const test = parseFloat(scores.Test) || 0
+    const assignment = parseFloat(scores.Assignment) || 0
+    const exam = parseFloat(scores.Exam) || 0
+    return test + assignment + exam
   }
 
   const handleSaveGrades = async () => {
@@ -133,7 +145,7 @@ function InputGradesContent() {
         for (const examType of examTypes) {
           if (scores[examType] !== '' && scores[examType] !== null) {
             const marks = parseFloat(scores[examType])
-            if (!isNaN(marks) && marks >= 0 && marks <= 100) {
+            if (!isNaN(marks) && marks >= 0 && marks <= scoreLimits[examType]) {
               await createGrade({
                 student: student._id,
                 subject: selectedSubject,
@@ -149,25 +161,26 @@ function InputGradesContent() {
         }
       }
 
-      setMessage({ type: 'success', text: 'Grades saved successfully!' })
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
+      setMessage({ type: 'success', text: 'Grades saved successfully! Select another subject to continue grading.' })
       
+      // Reset only the subject and scores, keeping class selected
+      setSelectedSubject('')
       setStudentScores(prev => {
         const reset = {}
         studentsList.forEach(student => {
           reset[student._id] = {
             Test: '',
-            Quiz: '',
             Assignment: '',
-            Project: '',
-            'Midterm': '',
-            'Final Exam': ''
+            Exam: ''
           }
         })
         return reset
       })
+      
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setMessage({ type: '', text: '' })
+      }, 3000)
 
     } catch (error) {
       console.error('Error saving grades:', error)
@@ -295,7 +308,7 @@ function InputGradesContent() {
                   <span>Student Scores - {subjects.find(s => s._id === selectedSubject)?.Name || 'Subject'}</span>
                 </CardTitle>
                 <p className="text-xs sm:text-sm mt-1">
-                  Enter scores for each student (0-100). Leave blank if not applicable.
+                  Enter scores: Test (0-20), Assignment (0-10), Exam (0-70). Total is calculated automatically and should equal 100.
                 </p>
               </CardHeader>
               <CardContent>
@@ -304,12 +317,22 @@ function InputGradesContent() {
                     <thead>
                       <tr className="bg-gray-50">
                         <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-left font-semibold sticky left-0 bg-gray-50">Student Name</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-blue-50">Test</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-blue-50">Quiz</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-blue-50">Assign</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-blue-50">Proj</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-orange-50">Mid</th>
-                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-orange-50">Final</th>
+                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-blue-100">
+                          <div>Test</div>
+                          <div className="text-xs font-normal">(0-20)</div>
+                        </th>
+                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-green-100">
+                          <div>Assignment</div>
+                          <div className="text-xs font-normal">(0-10)</div>
+                        </th>
+                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-orange-100">
+                          <div>Exam</div>
+                          <div className="text-xs font-normal">(0-70)</div>
+                        </th>
+                        <th className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold bg-purple-100">
+                          <div>Total</div>
+                          <div className="text-xs font-normal">(Auto)</div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -322,7 +345,7 @@ function InputGradesContent() {
                             <input
                               type="number"
                               min="0"
-                              max="100"
+                              max="20"
                               value={studentScores[student._id]?.Test || ''}
                               onChange={(e) => handleScoreChange(student._id, 'Test', e.target.value)}
                               placeholder="0"
@@ -333,56 +356,34 @@ function InputGradesContent() {
                             <input
                               type="number"
                               min="0"
-                              max="100"
-                              value={studentScores[student._id]?.Quiz || ''}
-                              onChange={(e) => handleScoreChange(student._id, 'Quiz', e.target.value)}
-                              placeholder="0"
-                              className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-1 py-1">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
+                              max="10"
                               value={studentScores[student._id]?.Assignment || ''}
                               onChange={(e) => handleScoreChange(student._id, 'Assignment', e.target.value)}
                               placeholder="0"
-                              className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                           </td>
                           <td className="border border-gray-300 px-1 py-1">
                             <input
                               type="number"
                               min="0"
-                              max="100"
-                              value={studentScores[student._id]?.Project || ''}
-                              onChange={(e) => handleScoreChange(student._id, 'Project', e.target.value)}
-                              placeholder="0"
-                              className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-1 py-1">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={studentScores[student._id]?.['Midterm'] || ''}
-                              onChange={(e) => handleScoreChange(student._id, 'Midterm', e.target.value)}
+                              max="70"
+                              value={studentScores[student._id]?.Exam || ''}
+                              onChange={(e) => handleScoreChange(student._id, 'Exam', e.target.value)}
                               placeholder="0"
                               className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                             />
                           </td>
-                          <td className="border border-gray-300 px-1 py-1">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={studentScores[student._id]?.['Final Exam'] || ''}
-                              onChange={(e) => handleScoreChange(student._id, 'Final Exam', e.target.value)}
-                              placeholder="0"
-                              className="w-full px-1 py-1 sm:px-2 sm:py-1.5 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            />
+                          <td className="border border-gray-300 px-2 py-2 sm:px-4 sm:py-3 text-center font-semibold">
+                            <span className={`px-2 py-1 rounded-md text-sm font-bold ${
+                              calculateTotal(student._id) === 100 
+                                ? 'bg-green-100 text-green-700' 
+                                : calculateTotal(student._id) > 0
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}>
+                              {calculateTotal(student._id)}
+                            </span>
                           </td>
                         </tr>
                       ))}

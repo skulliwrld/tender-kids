@@ -29,7 +29,7 @@ function TeacherAttendanceContent() {
   useEffect(() => {
     async function fetchClasses() {
       try {
-        const res = await fetch('/api/teacher/classes')
+        const res = await fetch(`/api/teacher/classes?email=${session?.user?.email}`)
         const data = await res.json()
         setClasses(data.classes || [])
         
@@ -45,7 +45,7 @@ function TeacherAttendanceContent() {
       }
     }
     fetchClasses()
-  }, [searchParams])
+  }, [searchParams, session?.user?.email])
 
   useEffect(() => {
     async function fetchStudents() {

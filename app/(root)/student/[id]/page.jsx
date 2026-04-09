@@ -1,10 +1,10 @@
 import { fetchIndividualStudentData, AllClassFetch } from '@/lib/DataFech/All-data';
 import Link from 'next/link';
-import Image from 'next/image';
 import { FaUser, FaEnvelope, FaPhone, FaCalendar, FaVenusMars, FaMapMarkerAlt, FaGraduationCap, FaEdit, FaArrowLeft, FaMoneyBillWave, FaCheckCircle, FaTimesCircle, FaBook, FaUserTie } from 'react-icons/fa';
 import { connectToDB } from '@/lib/Database/connectToDB';
 import { Student } from '@/models/student.model';
 import { Parent } from '@/models/parent.model';
+import StudentPhotoDialog from '@/components/StudentPhotoDialog';
 
 async function StudentProfilePage(props) {
   const params = await props.params;
@@ -80,20 +80,7 @@ async function StudentProfilePage(props) {
           
           <div className="px-8 pb-8">
             <div className="relative -mt-16 mb-6 flex flex-col md:flex-row items-center md:items-end gap-6">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                {student.photo ? (
-                  <Image 
-                    src={student.photo} 
-                    alt={student.Name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-4xl font-bold">
-                    {student.Name?.charAt(0)?.toUpperCase() || 'S'}
-                  </div>
-                )}
-              </div>
+              <StudentPhotoDialog student={student} imageSize="w-32 h-32" borderSize="border-4" />
               
               <div className="flex-1 text-center md:text-left mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{student.Name}</h1>

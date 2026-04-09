@@ -24,14 +24,13 @@ const gradeSchema = new mongoose.Schema(
     },
     exam: {
       type: String,
-      enum: ['Test', 'Quiz', 'Assignment', 'Project', 'Midterm', 'Final Exam'],
+      enum: ['Test', 'Assignment', 'Exam'],
       required: true,
     },
     marks: {
       type: Number,
       required: true,
       min: 0,
-      max: 100,
     },
     grade: {
       type: String,

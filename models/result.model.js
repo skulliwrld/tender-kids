@@ -58,8 +58,32 @@ const resultSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Subject',
         },
-        marks: Number,
+        testScore: {
+          type: Number,
+          min: 0,
+          max: 20,
+          default: 0,
+        },
+        assignmentScore: {
+          type: Number,
+          min: 0,
+          max: 10,
+          default: 0,
+        },
+        examScore: {
+          type: Number,
+          min: 0,
+          max: 70,
+          default: 0,
+        },
+        total: {
+          type: Number,
+          min: 0,
+          max: 100,
+          default: 0,
+        },
         grade: String,
+        remarks: String,
       },
     ],
     promoted: {
