@@ -26,7 +26,7 @@ function NavBar({ onMenuToggle }) {
       router.push(dashboardRoutes[session.user.role] || '/dashboard')
     }
   }
-  
+  // New comment: Implement scroll behavior for hiding/showing the navbar and adding shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
