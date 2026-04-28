@@ -8,9 +8,16 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get('email')
     const all = searchParams.get('all')
+    const classId = searchParams.get('classId')
 
     if (all === 'true') {
-      const students = await Student.find().populate('Class', 'name').sort({ Name: 1 })
+      const query = {}
+
+      if (classId) {
+        query.Class = classId
+      }
+
+      const students = await Student.find(query).populate('Class', 'name numericId').sort({ Name: 1 })
       return NextResponse.json(students)
     }
 

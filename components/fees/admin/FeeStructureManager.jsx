@@ -89,11 +89,16 @@ export default function FeeStructureManager() {
   };
 
   const fetchStudents = async () => {
+    if (!selectedClass) {
+      setStudents([]);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/student?all=true');
+      const params = new URLSearchParams({ all: 'true', classId: selectedClass });
+      const res = await fetch(`/api/student?${params.toString()}`);
       const data = await res.json();
-      const classStudents = Array.isArray(data) ? data.filter(s => s.Class?._id === selectedClass || s.Class === selectedClass) : [];
-      setStudents(classStudents);
+      setStudents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching students:', error);
       setStudents([]);
@@ -242,7 +247,7 @@ export default function FeeStructureManager() {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      alert(`Assigned to ${data.assigned} students, skipped ${data.skipped}`);
+      alert(`Assigned to ${data.assigned} students, updated ${data.updated || 0}, skipped ${data.skipped}`);
       setShowAssignModal(false);
     } catch (error) {
       console.error('Error assigning fee:', error);
