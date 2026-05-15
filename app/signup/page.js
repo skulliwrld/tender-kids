@@ -17,6 +17,19 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showAdminOption, setShowAdminOption] = useState(true)
   const [loadingAdmin, setLoadingAdmin] = useState(true)
+  const [classes, setClasses] = useState([])
+  const [parents, setParents] = useState([])
+  const [studentForm, setStudentForm] = useState({
+    classId: '',
+    parentId: '',
+    dob: '',
+    gender: '',
+    bio: '',
+    address: '',
+    phone: '',
+    section: '',
+    photo: '',
+  })
   const router = useRouter()
 
   useEffect(() => {
@@ -34,6 +47,31 @@ export default function SignupPage() {
     checkAdminCount()
   }, [])
 
+  useEffect(() => {
+    if (selectedRole === 'student') {
+      fetchStudentSignupData()
+    }
+  }, [selectedRole])
+
+  const fetchStudentSignupData = async () => {
+    try {
+      const [classesRes, parentsRes] = await Promise.all([
+        fetch('/api/classes'),
+        fetch('/api/parent'),
+      ])
+
+      const classesData = await classesRes.json()
+      const parentsData = await parentsRes.json()
+
+      setClasses(Array.isArray(classesData) ? classesData : [])
+      setParents(parentsData?.success && Array.isArray(parentsData.parents) ? parentsData.parents : [])
+    } catch (error) {
+      console.error('Error fetching student signup data:', error)
+      setClasses([])
+      setParents([])
+    }
+  }
+
   const handleRoleSelect = (selectedRole) => {
     setSelectedRole(selectedRole)
     setRole(selectedRole)
@@ -47,6 +85,17 @@ export default function SignupPage() {
     setPassword('')
     setConfirmPassword('')
     setError('')
+    setStudentForm({
+      classId: '',
+      parentId: '',
+      dob: '',
+      gender: '',
+      bio: '',
+      address: '',
+      phone: '',
+      section: '',
+      photo: '',
+    })
   }
 
   const handleSubmit = async (e) => {
@@ -76,7 +125,7 @@ export default function SignupPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role, ...studentForm }),
     })
 
     if (res.ok) {
@@ -332,6 +381,102 @@ export default function SignupPage() {
                   />
                 </div>
               </div>
+
+              {selectedRole === 'student' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Class</label>
+                    <select
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 text-sm sm:text-base"
+                      value={studentForm.classId}
+                      onChange={(e) => setStudentForm((prev) => ({ ...prev, classId: e.target.value }))}
+                    >
+                      <option value="">Select class</option>
+                      {classes.map((cls) => (
+                        <option key={cls._id} value={cls._id}>
+                          {cls.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Parent/Guardian</label>
+                    <select
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 text-sm sm:text-base"
+                      value={studentForm.parentId}
+                      onChange={(e) => setStudentForm((prev) => ({ ...prev, parentId: e.target.value }))}
+                    >
+                      <option value="">Select parent</option>
+                      {parents.map((parent) => (
+                        <option key={parent._id} value={parent._id}>
+                          {parent.Name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date of Birth</label>
+                      <input
+                        type="date"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 text-sm sm:text-base"
+                        value={studentForm.dob}
+                        onChange={(e) => setStudentForm((prev) => ({ ...prev, dob: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gender</label>
+                      <select
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 text-sm sm:text-base"
+                        value={studentForm.gender}
+                        onChange={(e) => setStudentForm((prev) => ({ ...prev, gender: e.target.value }))}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone</label>
+                      <input
+                        type="tel"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm sm:text-base"
+                        placeholder="Enter phone number"
+                        value={studentForm.phone}
+                        onChange={(e) => setStudentForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Address</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm sm:text-base"
+                        placeholder="Enter address"
+                        value={studentForm.address}
+                        onChange={(e) => setStudentForm((prev) => ({ ...prev, address: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Bio</label>
+                    <textarea
+                      rows="3"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm sm:text-base resize-none"
+                      placeholder="Student bio (optional)"
+                      value={studentForm.bio}
+                      onChange={(e) => setStudentForm((prev) => ({ ...prev, bio: e.target.value }))}
+                    />
+                  </div>
+                </>
+              )}
 
               {error && (
                 <div className="bg-red-50 text-red-600 p-2.5 sm:p-3 rounded-xl text-xs sm:text-sm text-center">

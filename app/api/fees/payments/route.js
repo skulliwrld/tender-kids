@@ -27,14 +27,19 @@ export async function GET(req) {
     }
     
     let targetStudentId = studentId;
+    let restrictedToSessionUser = false;
     
     try {
       const session = await getServerSession(authConfig);
       if (session?.user?.role && ['student', 'parent'].includes(session.user.role)) {
+        restrictedToSessionUser = true;
         await connectToDB();
         
         if (session.user.role === 'student') {
-          const student = await Student.findOne({ Email: session.user.email });
+          let student = await Student.findOne({ Email: session.user.email });
+          if (!student && session.user.name) {
+            student = await Student.findOne({ Name: session.user.name });
+          }
           if (student) targetStudentId = student._id.toString();
         } else if (session.user.role === 'parent') {
           if (!studentId) {
@@ -56,6 +61,10 @@ export async function GET(req) {
     if (targetStudentId) {
       const payments = await getStudentPayments(targetStudentId, academicSessionId, termId, paymentDate);
       return NextResponse.json(payments);
+    }
+
+    if (restrictedToSessionUser) {
+      return NextResponse.json([]);
     }
     
     const payments = await getPayments({ academicSessionId, termId, paymentDate });

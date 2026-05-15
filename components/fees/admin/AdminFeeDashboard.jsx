@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminFeeDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -31,7 +31,7 @@ export default function AdminFeeDashboard() {
       const res = await fetch('/api/fees/academic');
       const data = await res.json();
       setSessions(Array.isArray(data) ? data : []);
-      const active = data?.find(s => s.isActive);
+      const active = data?.find((session) => session.isActive);
       if (active) {
         setSelectedSession(active._id);
       }
@@ -45,7 +45,7 @@ export default function AdminFeeDashboard() {
       const res = await fetch(`/api/fees/academic?type=terms&id=${sessionId}`);
       const data = await res.json();
       setTerms(Array.isArray(data) ? data : []);
-      const active = data?.find(t => t.isActive);
+      const active = data?.find((term) => term.isActive);
       if (active) {
         setSelectedTerm(active._id);
       }
@@ -61,7 +61,7 @@ export default function AdminFeeDashboard() {
       if (selectedSession) params.append('academicSessionId', selectedSession);
       if (selectedTerm) params.append('termId', selectedTerm);
       if (paymentDate) params.append('paymentDate', paymentDate);
-      
+
       const res = await fetch(`/api/fees/reports?${params}`);
       const data = await res.json();
       setDashboardData(data);
@@ -71,6 +71,8 @@ export default function AdminFeeDashboard() {
       setLoading(false);
     }
   };
+
+  const formatCurrency = (amount) => `N ${(amount || 0).toLocaleString()}`;
 
   if (loading) return <div className="p-6">Loading dashboard...</div>;
 
@@ -93,16 +95,29 @@ export default function AdminFeeDashboard() {
               </option>
             ))}
           </select>
+          <select
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm w-full sm:w-48"
+            value={selectedTerm}
+            onChange={(e) => setSelectedTerm(e.target.value)}
+            disabled={!selectedSession}
+          >
+            <option value="">All terms</option>
+            {terms.map((term) => (
+              <option key={term._id} value={term._id}>
+                {term.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
         <Card>
           <CardHeader className="pb-1 sm:pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium">Total Expected</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold">₦{periodSummary?.totalExpected?.toLocaleString() || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold">{formatCurrency(periodSummary?.totalExpected)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -110,7 +125,7 @@ export default function AdminFeeDashboard() {
             <CardTitle className="text-xs sm:text-sm font-medium">Total Collected</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold text-green-600">₦{periodSummary?.totalPaid?.toLocaleString() || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold text-green-600">{formatCurrency(periodSummary?.totalPaid)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -118,7 +133,15 @@ export default function AdminFeeDashboard() {
             <CardTitle className="text-xs sm:text-sm font-medium">Outstanding</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-lg sm:text-2xl font-bold text-red-600">₦{periodSummary?.totalBalance?.toLocaleString() || 0}</div>
+            <div className="text-lg sm:text-2xl font-bold text-red-600">{formatCurrency(periodSummary?.totalBalance)}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">All Arrears</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg sm:text-2xl font-bold text-amber-600">{formatCurrency(periodSummary?.totalArrears)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -147,7 +170,7 @@ export default function AdminFeeDashboard() {
                   <span className="capitalize text-sm sm:text-base">{item._id}</span>
                   <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
                     <span>{item.count} fees</span>
-                    <span className="font-semibold">₦{item.amount?.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(item.amount)}</span>
                   </div>
                 </div>
               ))}
@@ -166,7 +189,7 @@ export default function AdminFeeDashboard() {
                   <span className="capitalize text-sm sm:text-base">{item._id}</span>
                   <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
                     <span>{item.count} txns</span>
-                    <span className="font-semibold">₦{item.total?.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(item.total)}</span>
                   </div>
                 </div>
               ))}
@@ -187,18 +210,18 @@ export default function AdminFeeDashboard() {
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
                 {paymentDate && (
                   <button
                     onClick={() => setPaymentDate('')}
-                    className="text-xs text-blue-600 hover:underline"
+                    className="text-left text-xs text-blue-600 hover:underline sm:text-right"
                   >
                     Clear
                   </button>
                 )}
                 <input
                   type="date"
-                  className="rounded-md border border-gray-300 px-2 py-1 text-xs sm:text-sm"
+                  className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs sm:w-auto sm:text-sm"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
                 />
@@ -211,14 +234,14 @@ export default function AdminFeeDashboard() {
                 <div className="max-h-96 overflow-y-auto space-y-2 sm:space-y-3 pr-2">
                   {recentPayments.map((payment) => (
                     <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
-                      <div>
-                        <p className="font-medium text-sm sm:text-base">{payment.student?.Name}</p>
+                      <div className="min-w-0 w-full sm:w-auto">
+                        <p className="font-medium text-sm sm:text-base break-words">{payment.student?.Name}</p>
                         <p className="text-xs sm:text-sm text-gray-500">
                           {new Date(payment.paymentDate).toLocaleTimeString()}
                         </p>
                       </div>
                       <div className="text-left sm:text-right">
-                        <p className="font-semibold text-green-600 text-sm sm:text-base">₦{payment.amount?.toLocaleString()}</p>
+                        <p className="font-semibold text-green-600 text-sm sm:text-base">{formatCurrency(payment.amount)}</p>
                         <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod}</p>
                       </div>
                     </div>
@@ -228,14 +251,14 @@ export default function AdminFeeDashboard() {
                 <div className="space-y-2 sm:space-y-3">
                   {recentPayments.slice(0, 5).map((payment) => (
                     <div key={payment._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
-                      <div>
-                        <p className="font-medium text-sm sm:text-base">{payment.student?.Name}</p>
+                      <div className="min-w-0 w-full sm:w-auto">
+                        <p className="font-medium text-sm sm:text-base break-words">{payment.student?.Name}</p>
                         <p className="text-xs sm:text-sm text-gray-500">
                           {new Date(payment.paymentDate).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-left sm:text-right">
-                        <p className="font-semibold text-green-600 text-sm sm:text-base">₦{payment.amount?.toLocaleString()}</p>
+                        <p className="font-semibold text-green-600 text-sm sm:text-base">{formatCurrency(payment.amount)}</p>
                         <p className="text-xs sm:text-sm text-gray-500 capitalize">{payment.paymentMethod}</p>
                       </div>
                     </div>
@@ -261,12 +284,12 @@ export default function AdminFeeDashboard() {
             <div className="space-y-2 sm:space-y-3">
               {topDebtors?.slice(0, 5).map((debtor) => (
                 <div key={debtor._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4 border-b pb-2">
-                  <div>
-                    <p className="font-medium text-sm sm:text-base">{debtor.name}</p>
+                  <div className="min-w-0 w-full sm:w-auto">
+                    <p className="font-medium text-sm sm:text-base break-words">{debtor.name}</p>
                     <p className="text-xs sm:text-sm text-gray-500">{debtor.feesCount} fee(s)</p>
                   </div>
                   <div className="font-semibold text-red-600 text-sm sm:text-base">
-                    ₦{debtor.totalOwed?.toLocaleString()}
+                    {formatCurrency(debtor.totalOwed)}
                   </div>
                 </div>
               ))}

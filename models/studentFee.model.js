@@ -19,7 +19,22 @@ const studentFeeSchema = new Schema({
   feeStructure: {
     type: Schema.Types.ObjectId,
     ref: 'FeeStructure',
-    required: true,
+    default: null,
+    required() {
+      return this.feeCategory !== 'arrears';
+    },
+  },
+  feeCategory: {
+    type: String,
+    enum: ['school_fee', 'arrears'],
+    default: 'school_fee',
+  },
+  title: {
+    type: String,
+    trim: true,
+  },
+  description: {
+    type: String,
   },
   originalAmount: {
     type: Number,
@@ -49,6 +64,10 @@ const studentFeeSchema = new Schema({
     type: Number,
     default: 0,
   },
+  arrears: {
+    type: Number,
+    default: 0,
+  },
   waiverAmount: {
     type: Number,
     default: 0,
@@ -65,8 +84,16 @@ const studentFeeSchema = new Schema({
   },
 }, { timestamps: true });
 
-studentFeeSchema.index({ student: 1, academicSession: 1, term: 1, feeStructure: 1 }, { unique: true });
+studentFeeSchema.index(
+  { student: 1, academicSession: 1, term: 1, feeStructure: 1 },
+  { unique: true, partialFilterExpression: { feeStructure: { $exists: true, $type: 'objectId' } } }
+);
 studentFeeSchema.index({ student: 1, status: 1 });
 studentFeeSchema.index({ academicSession: 1, term: 1, status: 1 });
+studentFeeSchema.index({ student: 1, feeCategory: 1, createdAt: -1 });
 
-export const StudentFee = models.StudentFee || model("StudentFee", studentFeeSchema);
+if (models.StudentFee) {
+  delete models.StudentFee;
+}
+
+export const StudentFee = model("StudentFee", studentFeeSchema);

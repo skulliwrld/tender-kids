@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authConfig } from '@/auth.config';
-import { getStudentFees, getStudentFeeSummary, getStudentFeeById, updateStudentFee, waiveStudentFee, deleteStudentFee, recalculateFeeBalance } from '@/lib/actions/studentFee.action';
+import { getStudentFees, getStudentFeeSummary, getStudentFeeById, updateStudentFee, waiveStudentFee, deleteStudentFee, recalculateFeeBalance, createStandaloneArrear } from '@/lib/actions/studentFee.action';
 
 export async function GET(req) {
   try {
@@ -82,7 +82,35 @@ export async function PUT(req) {
     }
     
     const studentFee = await updateStudentFee(id, data);
+    // If arrears or amount changed, recalculate balance/status based on payments
+    if (data?.arrears !== undefined || data?.amount !== undefined || data?.waiverAmount !== undefined) {
+      const recalculated = await recalculateFeeBalance(id);
+      return NextResponse.json(recalculated);
+    }
+
     return NextResponse.json(studentFee);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req) {
+  try {
+    const session = await getServerSession(authConfig);
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const action = searchParams.get('action');
+    const data = await req.json();
+
+    if (action === 'standalone-arrears') {
+      const arrear = await createStandaloneArrear(data);
+      return NextResponse.json(arrear, { status: 201 });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
