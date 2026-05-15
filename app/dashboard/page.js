@@ -455,14 +455,36 @@ export default async function Dashboard() {
         {role === 'student' && studentData && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-              <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl p-4 sm:p-6 shadow-lg">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-12 sm:w-16 h-12 sm:h-16 bg-white/20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold">
-                    {session.user?.name?.charAt(0).toUpperCase()}
+              <div className="space-y-3 sm:space-y-4 md:col-span-1">
+                <div className="overflow-hidden rounded-3xl bg-white p-2 shadow-lg">
+                  <div className="relative h-64 overflow-hidden rounded-[1.6rem] border-2 border-purple-300 bg-purple-50 shadow-sm">
+                    {studentData.student?.photo ? (
+                      <img
+                        src={studentData.student.photo}
+                        alt={studentData.student?.Name || session.user?.name || 'Student'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-100 text-5xl font-bold text-purple-700">
+                        {session.user?.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-indigo-100 text-xs sm:text-sm">Student Name</p>
-                    <p className="text-lg sm:text-xl font-bold">{session.user?.name}</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-lg border border-indigo-100">
+                  <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">Student Details</p>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Name</p>
+                      <p className="mt-1 text-lg sm:text-xl font-bold text-gray-800 break-words">{session.user?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Class</p>
+                      <div className="mt-1 inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs sm:text-sm font-medium text-indigo-700">
+                        {studentData.className || 'No Class Assigned'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
