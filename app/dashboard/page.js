@@ -462,7 +462,7 @@ export default async function Dashboard() {
                       <img
                         src={studentData.student.photo}
                         alt={studentData.student?.Name || session.user?.name || 'Student'}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover object-[center_20%]"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-100 text-5xl font-bold text-purple-700">
